@@ -1,0 +1,22 @@
+<!-- Template para Ver los Espacios Disponibles (espacios.html) -->
+{% extends 'reservas/base.html' %}
+
+{% block title %}Espacios Disponibles{% endblock %}
+
+{% block content %}
+<div class="card-deck">
+    {% for espacio in espacios %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">{{ espacio.nombre }}</h5>
+                <p class="card-text">Capacidad: {{ espacio.capacidad }}</p>
+                <p class="card-text">{{ espacio.descripcion }}</p>
+                <p class="card-text">Disponible: {{ espacio.disponibilidad|yesno:"Sí,No" }}</p>
+                {% if espacio.disponibilidad %}
+                    <a href="{% url 'reservar' espacio.id %}" class="btn btn-primary">Reservar este Espacio</a>
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

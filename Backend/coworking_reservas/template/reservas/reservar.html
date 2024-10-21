@@ -1,0 +1,28 @@
+<!-- Template para Hacer una Reserva (reservar.html) -->
+{% extends 'reservas/base.html' %}
+
+{% block title %}Reservar Espacio{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <h2 class="card-title">Reservar {{ espacio.nombre }}</h2>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="fecha_reserva">Fecha de Reserva:</label>
+                <input type="date" id="fecha_reserva" name="fecha_reserva" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="hora_inicio">Hora de Inicio:</label>
+                <input type="time" id="hora_inicio" name="hora_inicio" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="hora_fin">Hora de Fin:</label>
+                <input type="time" id="hora_fin" name="hora_fin" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-success">Reservar</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

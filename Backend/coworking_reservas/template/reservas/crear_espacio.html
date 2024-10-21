@@ -1,0 +1,35 @@
+<!-- Template para Crear Espacio (crear_espacio.html) -->
+{% extends 'reservas/base.html' %}
+
+{% block title %}Crear Espacio{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <h2 class="card-title">Crear un Nuevo Espacio</h2>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="nombre">Nombre del Espacio:</label>
+                <input type="text" id="nombre" name="nombre" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="capacidad">Capacidad:</label>
+                <input type="number" id="capacidad" name="capacidad" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="descripcion">Descripción:</label>
+                <textarea id="descripcion" name="descripcion" class="form-control" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="disponibilidad">Disponible:</label>
+                <select id="disponibilidad" name="disponibilidad" class="form-control">
+                    <option value="True">Sí</option>
+                    <option value="False">No</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Crear Espacio</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

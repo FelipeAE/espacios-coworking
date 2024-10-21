@@ -1,0 +1,14 @@
+<!-- Template para Página de Inicio (index.html) -->
+{% extends 'reservas/base.html' %}
+
+{% block title %}Inicio{% endblock %}
+
+{% block content %}
+<div class="jumbotron text-center">
+    <h2>Bienvenido al Sistema de Reservas para Espacios de Coworking</h2>
+    <p>Utiliza los botones a continuación para navegar por el sistema:</p>
+    <a href="{% url 'espacios' %}" class="btn btn-primary btn-lg mb-3">Ver Espacios Disponibles</a>
+    <a href="{% url 'admin:index' %}" class="btn btn-secondary btn-lg mb-3">Ir al Panel Admin</a>
+    <a href="{% url 'crear_espacio' %}" class="btn btn-success btn-lg mb-3">Crear Espacio</a>
+</div>
+{% endblock %}
