@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3000'; // Cambia esto según tu servidor backend
+const API_URL = 'http://localhost:5000'; // Cambiado para apuntar al servidor backend en el puerto 5000
 
 // Obtenemos todas las reservas
 export const obtenerReservas = () => {
