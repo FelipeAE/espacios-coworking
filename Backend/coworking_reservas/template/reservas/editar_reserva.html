@@ -1,0 +1,35 @@
+{% extends 'reservas/base.html' %}
+
+{% block title %}Editar Reserva{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <h2 class="card-title">Editar Reserva</h2>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="fecha_reserva">Fecha de Reserva:</label>
+                <input type="date" id="fecha_reserva" name="fecha_reserva" class="form-control" value="{{ reserva.fecha_reserva|date:"Y-m-d" }}" required>
+            </div>
+            <div class="form-group">
+                <label for="hora_inicio">Hora de Inicio:</label>
+                <input type="time" id="hora_inicio" name="hora_inicio" class="form-control" value="{{ reserva.hora_inicio|time:"H:i" }}" required>
+            </div>
+            <div class="form-group">
+                <label for="hora_fin">Hora de Fin:</label>
+                <input type="time" id="hora_fin" name="hora_fin" class="form-control" value="{{ reserva.hora_fin|time:"H:i" }}" required>
+            </div>
+            <div class="form-group">
+                <label for="estado">Estado de la Reserva:</label>
+                <select id="estado" name="estado" class="form-control">
+                    <option value="Pendiente" {% if reserva.estado == "Pendiente" %}selected{% endif %}>Pendiente</option>
+                    <option value="Confirmada" {% if reserva.estado == "Confirmada" %}selected{% endif %}>Confirmada</option>
+                    <option value="Cancelada" {% if reserva.estado == "Cancelada" %}selected{% endif %}>Cancelada</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Actualizar Reserva</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

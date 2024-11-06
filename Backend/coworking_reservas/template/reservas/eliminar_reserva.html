@@ -1,0 +1,23 @@
+{% extends 'reservas/base.html' %}
+
+{% block title %}Eliminar Reserva{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <h2 class="card-title">¿Estás seguro de que deseas eliminar la reserva para el espacio "{{ reserva.espacio.nombre }}"?</h2>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Eliminar</button>
+            <a href="{% url 'ver_reservas' %}" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>
+<script>
+    document.querySelector('.btn-danger').addEventListener('click', function(event) {
+        if (!confirm('¿Estás seguro de que deseas eliminar esta reserva? Esta acción no se puede deshacer.')) {
+            event.preventDefault();
+        }
+    });
+</script>
+{% endblock %}

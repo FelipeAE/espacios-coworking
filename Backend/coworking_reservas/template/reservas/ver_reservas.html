@@ -1,0 +1,34 @@
+{% extends 'reservas/base.html' %}
+
+{% block title %}Mis Reservas{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Mis Reservas</h2>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Espacio</th>
+            <th>Fecha</th>
+            <th>Hora de Inicio</th>
+            <th>Hora de Fin</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for reserva in reservas %}
+            <tr>
+                <td>{{ reserva.espacio.nombre }}</td>
+                <td>{{ reserva.fecha_reserva }}</td>
+                <td>{{ reserva.hora_inicio }}</td>
+                <td>{{ reserva.hora_fin }}</td>
+                <td>{{ reserva.estado }}</td>
+                <td>
+                    <a href="{% url 'editar_reserva' reserva.id %}" class="btn btn-outline-secondary btn-sm">Editar</a>
+                    <a href="{% url 'eliminar_reserva' reserva.id %}" class="btn btn-outline-danger btn-sm">Eliminar</a>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

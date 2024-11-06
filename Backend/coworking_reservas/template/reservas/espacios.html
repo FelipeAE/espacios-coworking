@@ -12,9 +12,17 @@
                 <p class="card-text">Capacidad: {{ espacio.capacidad }}</p>
                 <p class="card-text">{{ espacio.descripcion }}</p>
                 <p class="card-text">Disponible: {{ espacio.disponibilidad|yesno:"Sí,No" }}</p>
-                {% if espacio.disponibilidad %}
-                    <a href="{% url 'reservar' espacio.id %}" class="btn btn-primary">Reservar este Espacio</a>
-                {% endif %}
+                <div class="d-flex justify-content-between">
+                    {% if espacio.disponibilidad %}
+                        <a href="{% url 'reservar' espacio.id %}" class="btn btn-primary">Reservar este Espacio</a>
+                    {% endif %}
+                    {% if user.is_staff %}  <!-- Solo visible para usuarios con permisos de administrador -->
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'editar_espacio' espacio.id %}" class="btn btn-outline-secondary btn-sm" title="Editar"><i class="bi bi-pencil"></i></a>
+                            <a href="{% url 'eliminar_espacio' espacio.id %}" class="btn btn-outline-danger btn-sm" title="Eliminar"><i class="bi bi-trash"></i></a>
+                        </div>
+                    {% endif %}
+                </div>
             </div>
         </div>
     {% endfor %}
