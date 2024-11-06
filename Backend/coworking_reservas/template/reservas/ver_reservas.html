@@ -24,7 +24,9 @@
                 <td>{{ reserva.hora_fin }}</td>
                 <td>{{ reserva.estado }}</td>
                 <td>
-                    <a href="{% url 'editar_reserva' reserva.id %}" class="btn btn-outline-secondary btn-sm">Editar</a>
+                    {% if user.is_staff %}
+                        <a href="{% url 'editar_reserva' reserva.id %}" class="btn btn-outline-secondary btn-sm">Editar</a>
+                    {% endif %}
                     <a href="{% url 'eliminar_reserva' reserva.id %}" class="btn btn-outline-danger btn-sm">Eliminar</a>
                 </td>
             </tr>
