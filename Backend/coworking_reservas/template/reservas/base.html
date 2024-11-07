@@ -30,7 +30,7 @@
                             </form>
                         </li>
                         <li class="nav-item"><a class="nav-link" href="{% url 'espacios' %}">Espacios Disponibles</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{% url 'ver_reservas' %}">Mis Reservas</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'ver_reservas' %}">Ver Reservas</a></li>
                         {% if user.is_staff %}
                             <li class="nav-item"><a class="nav-link" href="{% url 'crear_espacio' %}">Crear Espacio</a></li>
                             <li class="nav-item"><a class="nav-link" href="{% url 'admin:index' %}">Panel Admin</a></li>
