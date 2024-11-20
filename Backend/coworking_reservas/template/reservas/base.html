@@ -21,8 +21,8 @@
                 <ul class="navbar-nav ms-auto">
                     {% if user.is_authenticated %}
                         <li class="nav-item">
-                            <span class="navbar-text me-3">Bienvenido, {{ user.username }}</span>
-                        </li>
+                            <a class="nav-link" href="{% url 'perfil' %}">Bienvenido, {{ user.username }}</a>
+                        </li>                    
                         <li class="nav-item">
                             <form action="{% url 'logout' %}" method="post" style="display: inline;">
                                 {% csrf_token %}

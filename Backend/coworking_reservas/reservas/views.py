@@ -5,8 +5,9 @@ from .serializers import EspacioSerializer, ReservaSerializer
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.utils import timezone
 from django.contrib import messages
-from django.contrib.auth import login
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import login, update_session_auth_hash
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm, PasswordChangeForm
+from .forms import EditarPerfilForm
 
 
 class EspacioViewSet(viewsets.ModelViewSet):
@@ -19,6 +20,41 @@ class ReservaViewSet(viewsets.ModelViewSet):
     
 def index(request):
     return render(request, 'reservas/index.html')
+
+@login_required
+def perfil_usuario(request):
+    return render(request, 'reservas/perfil.html', {'usuario': request.user})
+
+@login_required
+def editar_perfil(request):
+    if request.method == 'POST':
+        form = EditarPerfilForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Tu perfil ha sido actualizado con éxito.')
+            return redirect('perfil_usuario')
+        else:
+            messages.error(request, 'Por favor corrige los errores a continuación.')
+    else:
+        form = EditarPerfilForm(instance=request.user)
+    
+    return render(request, 'reservas/editar_perfil.html', {'form': form})
+
+@login_required
+def cambiar_contrasena(request):
+    if request.method == 'POST':
+        form = PasswordChangeForm(user=request.user, data=request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)  # Importante para mantener la sesión del usuario
+            messages.success(request, 'Tu contraseña ha sido actualizada correctamente.')
+            return redirect('perfil_usuario')
+        else:
+            messages.error(request, 'Por favor corrige los errores a continuación.')
+    else:
+        form = PasswordChangeForm(user=request.user)
+    
+    return render(request, 'reservas/cambiar_contrasena.html', {'form': form})
 
 def register(request):
     if request.method == 'POST':

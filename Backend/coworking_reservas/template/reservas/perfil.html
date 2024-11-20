@@ -1,0 +1,26 @@
+{% extends 'reservas/base.html' %}
+
+{% block title %}Perfil de Usuario{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <h2 class="card-title">Perfil de Usuario</h2>
+        <form method="post" action="">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="username">Nombre de Usuario:</label>
+                <input type="text" id="username" name="username" value="{{ usuario.username }}" class="form-control" readonly>
+            </div>
+            <div class="form-group mt-3">
+                <label for="email">Correo Electrónico:</label>
+                <input type="email" id="email" name="email" value="{{ usuario.email }}" class="form-control" readonly>
+            </div>
+            <div class="form-group mt-3">
+                <a href="{% url 'editar_perfil' %}" class="btn btn-primary">Editar Información</a>
+                <a href="{% url 'cambiar_contrasena' %}" class="btn btn-warning">Cambiar Contraseña</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
