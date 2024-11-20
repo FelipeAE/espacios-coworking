@@ -21,6 +21,10 @@
                 <textarea id="descripcion" name="descripcion" class="form-control" required>{{ espacio.descripcion }}</textarea>
             </div>
             <div class="form-group">
+                <label for="precio">Precio por Hora (CLP):</label>
+                <input type="number" id="precio" name="precio" class="form-control" step="0.01" value="{{ espacio.precio }}" required>
+            </div>
+            <div class="form-group">
                 <label for="disponibilidad">Disponible:</label>
                 <select id="disponibilidad" name="disponibilidad" class="form-control">
                     <option value="True" {% if espacio.disponibilidad %}selected{% endif %}>Sí</option>
@@ -32,3 +36,4 @@
     </div>
 </div>
 {% endblock %}
+

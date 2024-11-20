@@ -1,0 +1,93 @@
+{% extends 'reservas/base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Dashboard de Reservas</h2>
+
+    <!-- Resumen de reservas -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-white bg-primary mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Total de Reservas</h5>
+                    <p class="card-text">{{ total_reservas }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-success mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Reservas Confirmadas</h5>
+                    <p class="card-text">{{ reservas_confirmadas }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-danger mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Reservas Canceladas</h5>
+                    <p class="card-text">{{ reservas_canceladas }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Espacios más reservados -->
+    <div class="mb-4">
+        <h3>Espacios Más Reservados</h3>
+        <ul class="list-group">
+            {% for espacio in espacios_populares %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    {{ espacio.nombre }}
+                    <span class="badge bg-primary rounded-pill">{{ espacio.num_reservas }}</span>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Gráfico de reservas por mes -->
+    <div class="mb-4">
+        <h3>Reservas por Mes</h3>
+        <canvas id="reservasPorMesChart"></canvas>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Datos del gráfico de reservas por mes
+    const labels = [
+        {% for mes in reservas_por_mes %}
+            'Mes {{ mes.month }}',
+        {% endfor %}
+    ];
+    const data = [
+        {% for mes in reservas_por_mes %}
+            {{ mes.total }},
+        {% endfor %}
+    ];
+
+    const ctx = document.getElementById('reservasPorMesChart').getContext('2d');
+    const reservasPorMesChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Número de Reservas',
+                data: data,
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

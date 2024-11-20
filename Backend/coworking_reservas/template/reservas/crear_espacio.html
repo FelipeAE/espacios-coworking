@@ -1,4 +1,3 @@
-<!-- Template para Crear Espacio (crear_espacio.html) -->
 {% extends 'reservas/base.html' %}
 
 {% block title %}Crear Espacio{% endblock %}
@@ -20,6 +19,10 @@
             <div class="form-group">
                 <label for="descripcion">Descripción:</label>
                 <textarea id="descripcion" name="descripcion" class="form-control" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="precio">Precio por Hora (CLP):</label>
+                <input type="number" id="precio" name="precio" class="form-control" step="0.01" required>
             </div>
             <div class="form-group">
                 <label for="disponibilidad">Disponible:</label>

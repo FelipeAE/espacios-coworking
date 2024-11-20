@@ -1,0 +1,16 @@
+{% extends 'reservas/base.html' %}
+
+{% block title %}Pago Exitoso{% endblock %}
+
+{% block content %}
+<div class="text-center mt-5">
+    <h2>🎉 ¡Pago Completado Exitosamente! 🎉</h2>
+    <p>Gracias por tu reserva. Hemos recibido tu pago y la reserva para el espacio ha sido confirmada.</p>
+    <p>Detalles del Pago:</p>
+    <ul>
+        <li>ID de Pago: {{ payment_id }}</li>
+        <li>Estado: {{ status }}</li>
+    </ul>
+    <a href="{% url 'ver_reservas' %}" class="btn btn-primary mt-4">Ver Mis Reservas</a>
+</div>
+{% endblock %}

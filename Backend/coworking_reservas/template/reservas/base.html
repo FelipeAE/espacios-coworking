@@ -29,7 +29,7 @@
                 <ul class="navbar-nav ms-auto">
                     {% if user.is_authenticated %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'perfil' %}">Bienvenido, {{ user.username }}</a>
+                            <a class="nav-link" href="{% url 'perfil_usuario' %}">Bienvenido, {{ user.username }}</a>
                         </li>                    
                         <li class="nav-item">
                             <form action="{% url 'logout' %}" method="post" style="display: inline;">
@@ -41,6 +41,7 @@
                         <li class="nav-item"><a class="nav-link" href="{% url 'ver_reservas' %}">Ver Reservas</a></li>
                         {% if user.is_staff %}
                             <li class="nav-item"><a class="nav-link" href="{% url 'crear_espacio' %}">Crear Espacio</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a></li>
                             <li class="nav-item"><a class="nav-link" href="{% url 'admin:index' %}">Panel Admin</a></li>
                         {% endif %}
                     {% else %}

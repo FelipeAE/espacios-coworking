@@ -1,0 +1,14 @@
+{% extends 'reservas/base.html' %}
+
+{% block title %}Pago Fallido{% endblock %}
+
+{% block content %}
+<div class="text-center mt-5">
+    <h2>⚠️ Pago Fallido ⚠️</h2>
+    <p>Lo sentimos, pero hubo un problema al procesar tu pago. Por favor, intenta de nuevo.</p>
+    {% if error %}
+        <p>Detalles del error: {{ error }}</p>
+    {% endif %}
+    <a href="{% url 'espacios' %}" class="btn btn-secondary mt-4">Volver a Espacios Disponibles</a>
+</div>
+{% endblock %}

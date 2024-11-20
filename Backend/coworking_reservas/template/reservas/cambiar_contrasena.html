@@ -1,16 +1,12 @@
 {% extends 'reservas/base.html' %}
 
-{% block title %}Cambiar Contraseña{% endblock %}
-
 {% block content %}
-<div class="card">
-    <div class="card-body">
-        <h2 class="card-title">Cambiar Contraseña</h2>
-        <form method="post" action="">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit" class="btn btn-primary">Actualizar Contraseña</button>
-        </form>
-    </div>
+<div class="container">
+    <h2 class="mb-4">Cambiar Contraseña</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Cambiar Contraseña</button>
+    </form>
 </div>
 {% endblock %}

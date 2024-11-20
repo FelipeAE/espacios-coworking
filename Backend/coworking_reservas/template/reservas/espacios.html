@@ -11,6 +11,7 @@
                 <h5 class="card-title">{{ espacio.nombre }}</h5>
                 <p class="card-text">Capacidad: {{ espacio.capacidad }}</p>
                 <p class="card-text">{{ espacio.descripcion }}</p>
+                <p class="card-text">Precio: ${{ espacio.precio }}</p>
                 <p class="card-text">Disponible: {{ espacio.disponibilidad|yesno:"Sí,No" }}</p>
                 <div class="d-flex justify-content-between">
                     {% if espacio.disponibilidad %}
