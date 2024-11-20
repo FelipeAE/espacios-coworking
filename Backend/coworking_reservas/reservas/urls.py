@@ -24,4 +24,6 @@ urlpatterns = [
     path('ver-reservas/', views.ver_reservas, name='ver_reservas'),
     path('editar-reserva/<int:reserva_id>/', views.editar_reserva, name='editar_reserva'),
     path('eliminar-reserva/<int:reserva_id>/', views.eliminar_reserva, name='eliminar_reserva'),
+    path('notificaciones/', views.ver_notificaciones, name='notificaciones'),
+    path('notificaciones/marcar/', views.marcar_notificacion_como_leida, name='marcar_notificacion_como_leida'),
 ]

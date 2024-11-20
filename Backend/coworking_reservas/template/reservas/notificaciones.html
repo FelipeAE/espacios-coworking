@@ -1,0 +1,27 @@
+{% extends 'reservas/base.html' %}
+
+{% block title %}Notificaciones{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Notificaciones</h2>
+<ul class="list-group">
+    {% if notificaciones %}
+        {% for notificacion in notificaciones %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{ notificacion.tipo }}: {{ notificacion.reserva.espacio.nombre }} - {{ notificacion.fecha_envio|date:"j N Y H:i" }}
+                {% if notificacion.leida %}
+                    <span class="badge bg-success">Leída</span>
+                {% else %}
+                    <form action="{% url 'marcar_notificacion_como_leida' %}" method="post" style="display: inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="notificacion_id" value="{{ notificacion.id }}">
+                        <button type="submit" class="btn btn-sm btn-outline-primary">Marcar como leída</button>
+                    </form>
+                {% endif %}
+            </li>
+        {% endfor %}
+    {% else %}
+        <p>No tienes notificaciones.</p>
+    {% endif %}
+</ul>
+{% endblock %}

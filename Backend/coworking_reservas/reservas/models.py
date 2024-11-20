@@ -29,9 +29,10 @@ class Reserva(models.Model):
         return f'Reserva de {self.usuario} en {self.espacio} el {self.fecha_reserva}'
 
 class Notificacion(models.Model):
-    reserva = models.ForeignKey(Reserva, on_delete=models.CASCADE)
+    reserva = models.ForeignKey(Reserva, related_name='notificacion', on_delete=models.CASCADE)
     tipo = models.CharField(max_length=20, choices=[('Confirmacion', 'Confirmacion'), ('Recordatorio', 'Recordatorio')])
     fecha_envio = models.DateTimeField(auto_now_add=True)
+    leida = models.BooleanField(default=False)
 
     def __str__(self):
         return f'Notificación {self.tipo} para {self.reserva}'

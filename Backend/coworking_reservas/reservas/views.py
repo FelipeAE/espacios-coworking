@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from rest_framework import viewsets
-from .models import Espacio, Reserva
+from .models import Espacio, Reserva, Notificacion
 from .serializers import EspacioSerializer, ReservaSerializer
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.utils import timezone
@@ -19,7 +19,15 @@ class ReservaViewSet(viewsets.ModelViewSet):
     serializer_class = ReservaSerializer
     
 def index(request):
-    return render(request, 'reservas/index.html')
+    if request.user.is_authenticated:
+        notificaciones_no_leidas = request.user.reserva_set.filter(notificacion__leida=False).count()
+    else:
+        notificaciones_no_leidas = 0
+
+    return render(request, 'reservas/index.html', {
+        'notificaciones_no_leidas': notificaciones_no_leidas,
+    })
+
 
 @login_required
 def perfil_usuario(request):
@@ -152,8 +160,6 @@ def ver_reservas(request):
     reservas = Reserva.objects.all() if request.user.is_staff else Reserva.objects.filter(usuario=request.user)
     return render(request, 'reservas/ver_reservas.html', {'reservas': reservas})
 
-
-
 @login_required
 def editar_reserva(request, reserva_id):
     reserva = get_object_or_404(Reserva, pk=reserva_id)
@@ -170,13 +176,29 @@ def editar_reserva(request, reserva_id):
             reserva.espacio.disponibilidad = True
             reserva.espacio.save()
             
+            # Crear una notificación para el usuario que hizo la reserva
+            Notificacion.objects.create(
+                reserva=reserva,
+                tipo='Cancelacion',
+                leida=False
+            )
+            
         # Si se cambia el estado a Confirmada, actualizamos la disponibilidad del espacio
         if nuevo_estado == "Confirmada" and reserva.estado != "Confirmada":
             reserva.espacio.disponibilidad = False
             reserva.espacio.save()
-        
+            
+            # Crear una notificación para el usuario que hizo la reserva
+            Notificacion.objects.create(
+                reserva=reserva,
+                tipo='Confirmacion',
+                leida=False
+            )
+
+        # Guardar el nuevo estado de la reserva
         reserva.estado = nuevo_estado
         reserva.save()  # Guardar los cambios
+
         return redirect('ver_reservas')  # Redirigir a la lista de reservas
 
     return render(request, 'reservas/editar_reserva.html', {'reserva': reserva})
@@ -195,3 +217,40 @@ def eliminar_reserva(request, reserva_id):
         return redirect('ver_reservas')
 
     return render(request, 'reservas/eliminar_reserva.html', {'reserva': reserva})
+
+@login_required
+def ver_notificaciones(request):
+    if request.user.is_authenticated:
+        # Obtener todas las notificaciones del usuario
+        notificaciones = Notificacion.objects.filter(reserva__usuario=request.user)
+    else:
+        notificaciones = []
+
+    return render(request, 'reservas/notificaciones.html', {'notificaciones': notificaciones})
+
+@login_required
+def aprobar_reserva(request, reserva_id):
+    if request.user.is_staff:
+        reserva = get_object_or_404(Reserva, pk=reserva_id)
+        reserva.estado = 'Confirmada'
+        reserva.save()
+
+        # Crear una notificación
+        Notificacion.objects.create(
+            reserva=reserva,
+            tipo='Confirmacion'
+        )
+        
+        return redirect('ver_reservas')
+    
+@login_required
+def marcar_notificacion_como_leida(request):
+    if request.method == 'POST':
+        notificacion_id = request.POST.get('notificacion_id')
+        if notificacion_id:
+            notificacion = get_object_or_404(Notificacion, pk=notificacion_id)
+            # Verificar que la notificación pertenezca al usuario autenticado
+            if notificacion.reserva.usuario == request.user:
+                notificacion.leida = True
+                notificacion.save()
+    return redirect('notificaciones')

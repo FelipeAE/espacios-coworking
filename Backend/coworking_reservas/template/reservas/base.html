@@ -11,8 +11,16 @@
 </head>
 <body>
     <header class="bg-primary text-white text-center py-3">
-        <h1>Sistema de Reservas para Espacios de Coworking</h1>
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1 class="mb-0">Sistema de Reservas para Espacios de Coworking</h1>
+            <a href="{% url 'notificaciones' %}" class="text-white me-4">
+                <i class="bi bi-bell"></i>
+                {% if notificaciones_no_leidas > 0 %}
+                    <span class="badge bg-danger">{{ notificaciones_no_leidas }}</span>
+                {% endif %}
+            </a>
+        </div>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light mt-2">
             <a class="navbar-brand" href="{% url 'index' %}">Coworking</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
