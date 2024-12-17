@@ -37,7 +37,6 @@
                                 <button type="submit" class="btn btn-link nav-link" style="display: inline; padding: 0; border: none; background: none;">Cerrar Sesión</button>
                             </form>
                         </li>
-                        <li class="nav-item"><a class="nav-link" href="{% url 'espacios' %}">Espacios Disponibles</a></li>
                         <li class="nav-item"><a class="nav-link" href="{% url 'ver_reservas' %}">Ver Reservas</a></li>
                         {% if user.is_staff %}
                             <li class="nav-item"><a class="nav-link" href="{% url 'crear_espacio' %}">Crear Espacio</a></li>
@@ -45,6 +44,7 @@
                             <li class="nav-item"><a class="nav-link" href="{% url 'admin:index' %}">Panel Admin</a></li>
                         {% endif %}
                     {% else %}
+                        <li class="nav-item"><a class="nav-link" href="{% url 'espacios' %}">Espacios Disponibles</a></li>
                         <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Iniciar Sesión</a></li>
                         <li class="nav-item"><a class="nav-link" href="{% url 'register' %}">Registrarse</a></li>
                     {% endif %}

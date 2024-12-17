@@ -10,8 +10,8 @@
             <th>Usuario</th>
             <th>Espacio</th>
             <th>Fecha</th>
-            <th>Hora de Inicio</th>
-            <th>Hora de Fin</th>
+            <th>Bloques Reservados</th>
+            <th>Cantidad de Personas</th>
             <th>Estado</th>
             <th>Acciones</th>
         </tr>
@@ -22,8 +22,12 @@
                 <td>{{ reserva.usuario.username }}</td>
                 <td>{{ reserva.espacio.nombre }}</td>
                 <td>{{ reserva.fecha_reserva }}</td>
-                <td>{{ reserva.hora_inicio }}</td>
-                <td>{{ reserva.hora_fin }}</td>
+                <td>
+                    {% for bloque in reserva.bloques_seleccionados %}
+                        {{ bloque }}<br>
+                    {% endfor %}
+                </td>
+                <td>{{ reserva.cantidad_personas }}</td>                              
                 <td>{{ reserva.estado }}</td>
                 <td>
                     {% if user.is_staff %}

@@ -10,12 +10,14 @@ from django.contrib.auth.forms import UserCreationForm, UserChangeForm, Password
 from .forms import EditarPerfilForm
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 import mercadopago
 import os
 from dotenv import load_dotenv
 import json
 from django.db import models
+from django.db.models import Sum
+from datetime import datetime, timedelta
 
 load_dotenv()
 
@@ -108,41 +110,121 @@ def crear_espacio(request):
 
     return render(request, 'reservas/crear_espacio.html')
     
+from django.db.models import Sum
+from django.utils import timezone
+
 def espacios_disponibles(request):
     espacios = Espacio.objects.filter(disponibilidad=True)
-    return render(request, 'reservas/espacios.html', {'espacios': espacios})
+    fecha_actual = timezone.now().date()
+
+    # Generar bloques de horario disponibles y calcular capacidad restante para cada espacio
+    for espacio in espacios:
+        # Obtener los bloques disponibles
+        espacio.bloques_disponibles = generar_bloques_horarios_disponibles(espacio, fecha_actual)
+
+        # Sumar la cantidad de personas en reservas confirmadas
+        personas_reservadas = Reserva.objects.filter(
+            espacio=espacio,
+            fecha_reserva=fecha_actual,
+            estado="Confirmada"
+        ).aggregate(Sum('cantidad_personas'))['cantidad_personas__sum'] or 0
+
+        # Calcular la capacidad restante
+        espacio.capacidad_restante = max(espacio.capacidad - personas_reservadas, 0)
+
+    return render(request, 'reservas/espacios.html', {
+        'espacios': espacios,
+        'fecha_actual': fecha_actual
+    })
 
 @login_required
 def reservar_espacio(request, espacio_id):
     espacio = get_object_or_404(Espacio, pk=espacio_id)
-    
+    bloques_horarios = generar_bloques_horarios()
+
+    # Calcular la capacidad restante para hoy
+    fecha_actual = timezone.now().date()
+    personas_reservadas = Reserva.objects.filter(
+        espacio=espacio,
+        fecha_reserva=fecha_actual,
+        estado="Confirmada"
+    ).aggregate(Sum('cantidad_personas'))['cantidad_personas__sum'] or 0
+    capacidad_restante = max(espacio.capacidad - personas_reservadas, 0)
+
     if request.method == 'POST':
         try:
-            # Crear la reserva con estado 'Pendiente'
+            # Validación de la fecha
+            fecha_reserva = request.POST['fecha_reserva']
+            fecha_reserva_obj = timezone.datetime.strptime(fecha_reserva, "%Y-%m-%d").date()
+            if fecha_reserva_obj < timezone.now().date():
+                messages.error(request, 'No puedes reservar una fecha anterior al día actual.')
+                return redirect('reservar', espacio_id=espacio.id)
+
+            # Capturar bloques seleccionados
+            bloques_seleccionados = request.POST.getlist('bloques_horarios')
+            if not bloques_seleccionados:
+                messages.error(request, 'Debes seleccionar al menos un bloque de horario.')
+                return redirect('reservar', espacio_id=espacio.id)
+
+            # Validar si los bloques seleccionados están disponibles
+            for bloque in bloques_seleccionados:
+                hora_inicio, hora_fin = bloque.split(" - ")
+                conflicto = Reserva.objects.filter(
+                    espacio=espacio,
+                    fecha_reserva=fecha_reserva,
+                    hora_inicio__lt=hora_fin,
+                    hora_fin__gt=hora_inicio
+                ).exists()
+                if conflicto:
+                    messages.error(request, f"El bloque {bloque} ya está reservado. Selecciona otro horario.")
+                    return redirect('reservar', espacio_id=espacio.id)
+
+            # Capturar la cantidad de personas
+            cantidad_personas = int(request.POST.get('cantidad_personas', 0))
+            if cantidad_personas <= 0:
+                messages.error(request, 'Debes ingresar una cantidad válida de personas.')
+                return redirect('reservar', espacio_id=espacio.id)
+
+            # Recalcular capacidad restante en base a la fecha seleccionada
+            personas_reservadas = Reserva.objects.filter(
+                espacio=espacio,
+                fecha_reserva=fecha_reserva,
+                estado="Confirmada"
+            ).aggregate(Sum('cantidad_personas'))['cantidad_personas__sum'] or 0
+            capacidad_restante = max(espacio.capacidad - personas_reservadas, 0)
+
+            if cantidad_personas > capacidad_restante:
+                messages.error(request, f"Capacidad insuficiente. Capacidad disponible: {capacidad_restante}.")
+                return redirect('reservar', espacio_id=espacio.id)
+
+            # Calcular el precio total
+            total_precio = len(bloques_seleccionados) * float(espacio.precio)
+
+            # Crear la reserva
             reserva = Reserva.objects.create(
                 usuario=request.user,
                 espacio=espacio,
-                fecha_reserva=request.POST['fecha_reserva'],
-                hora_inicio=request.POST['hora_inicio'],
-                hora_fin=request.POST['hora_fin'],
+                fecha_reserva=fecha_reserva,
+                hora_inicio=bloques_seleccionados[0].split(" - ")[0],
+                hora_fin=bloques_seleccionados[-1].split(" - ")[1],
+                bloques_seleccionados=bloques_seleccionados,
+                cantidad_personas=cantidad_personas,
                 estado='Pendiente'
             )
-            
+
             # Inicializar el SDK de MercadoPago
             sdk = mercadopago.SDK('APP_USR-7241975703348439-103011-e9b1df29ec7ddf120c6957f8f4325b00-2068456564')
-            
-            # Construir URLs absolutas
             base_url = request.build_absolute_uri('/')[:-1]
-            
-            # Crear la preferencia para el pago
+
+            # Crear preferencia en MercadoPago
             preference_data = {
                 "items": [
                     {
                         "title": f"Reserva de {espacio.nombre}",
                         "quantity": 1,
                         "currency_id": "CLP",
-                        "unit_price": float(espacio.precio),  # Asumiendo que hay un precio en el modelo Espacio
-                        "description": f"Reserva para el espacio {espacio.nombre} desde {reserva.hora_inicio} hasta {reserva.hora_fin}",
+                        "unit_price": total_precio,
+                        "description": f"Reserva para {cantidad_personas} personas con {len(bloques_seleccionados)} bloques de horario."
                     }
                 ],
                 "back_urls": {
@@ -152,44 +234,74 @@ def reservar_espacio(request, espacio_id):
                 },
                 "auto_return": "approved",
                 "external_reference": str(reserva.id),
-                "notification_url": f"c59c-2803-c600-9104-d807-b551-7879-1a23-41a0.ngrok-free.app/webhook",  # Ajustar la URL si es necesario.
+                "notification_url": f"https://b644-2803-c600-9104-d807-4d97-193b-43a6-64b3.ngrok-free.app/webhook",
             }
-            
-            # Crear la preferencia en MercadoPago
+
+            # Crear la preferencia de pago
             preference_response = sdk.preference().create(preference_data)
-            
-            # Verificar si la respuesta es exitosa
             if preference_response["status"] in [200, 201]:
-                # Obtener la URL de pago
                 init_point = preference_response["response"]["init_point"]
-                
-                # En modo desarrollo, usar sandbox_init_point
-                if os.getenv('DEBUG', 'False').lower() == 'true':
-                    init_point = preference_response["response"]["sandbox_init_point"]
-                
-                # Redirigir directamente a la página de pago de MercadoPago
                 return redirect(init_point)
             else:
-                error_detail = json.dumps(preference_response, indent=2)
-                messages.error(request, f"Error al crear la preferencia de pago. Detalles: {error_detail}")
+                messages.error(request, "Error al conectar con MercadoPago.")
+                reserva.delete()
                 return redirect('espacios')
 
         except Exception as e:
-            import traceback
             print(f"Error completo: {str(e)}")
-            print(traceback.format_exc())
-            
-            # Si hay un error, eliminar la reserva si fue creada
             if 'reserva' in locals():
-                try:
-                    reserva.delete()
-                except:
-                    pass
-            
-            messages.error(request, f"Hubo un problema al procesar tu reserva. Inténtalo de nuevo más tarde.")
+                reserva.delete()
+            messages.error(request, "Ocurrió un error al procesar la reserva.")
             return redirect('espacios')
-    
-    return render(request, 'reservas/reservar.html', {'espacio': espacio})
+
+    return render(request, 'reservas/reservar.html', {
+        'espacio': espacio,
+        'bloques_horarios': bloques_horarios,
+        'hoy': timezone.now().date(),
+        'capacidad_restante': capacidad_restante
+    })
+
+def generar_bloques_horarios():
+    """Genera bloques de horarios de 1 hora entre 8:00 AM y 6:00 PM."""
+    bloques = []
+    hora_actual = timezone.datetime.strptime("08:00", "%H:%M")
+    hora_fin_dia = timezone.datetime.strptime("18:00", "%H:%M")
+
+    while hora_actual < hora_fin_dia:
+        siguiente_hora = hora_actual + timezone.timedelta(hours=1)
+        bloques.append(f"{hora_actual.strftime('%H:%M')} - {siguiente_hora.strftime('%H:%M')}")
+        hora_actual = siguiente_hora
+
+    return bloques
+
+def generar_bloques_horarios_disponibles(espacio, fecha_reserva):
+    """Genera bloques de horarios disponibles para un espacio específico."""
+    bloques = []
+    hora_actual = datetime.strptime("08:00", "%H:%M")
+    hora_fin_dia = datetime.strptime("18:00", "%H:%M")
+
+    # Obtener reservas existentes en la fecha seleccionada
+    reservas_existentes = Reserva.objects.filter(
+        espacio=espacio,
+        fecha_reserva=fecha_reserva
+    )
+
+    while hora_actual < hora_fin_dia:
+        siguiente_hora = hora_actual + timedelta(hours=1)
+        bloque = f"{hora_actual.strftime('%H:%M')} - {siguiente_hora.strftime('%H:%M')}"
+
+        # Validar si el bloque está disponible
+        conflicto = reservas_existentes.filter(
+            hora_inicio__lt=siguiente_hora.time(),
+            hora_fin__gt=hora_actual.time()
+        ).exists()
+
+        if not conflicto:
+            bloques.append(bloque)
+
+        hora_actual = siguiente_hora
+
+    return bloques
 
 # Vistas para manejar el resultado del pago
 def payment_success(request, reserva_id):
@@ -390,10 +502,6 @@ def marcar_notificacion_como_leida(request):
                 notificacion.leida = True
                 notificacion.save()
     return redirect('notificaciones')
-
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required, user_passes_test
-from .models import Reserva, Espacio
 
 @login_required
 @user_passes_test(lambda u: u.is_staff)  # Solo los administradores pueden ver el dashboard

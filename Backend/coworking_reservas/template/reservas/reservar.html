@@ -1,6 +1,4 @@
-<!-- Template para Hacer una Reserva (reservar.html) -->
 {% extends 'reservas/base.html' %}
-
 {% block title %}Reservar Espacio{% endblock %}
 
 {% block content %}
@@ -14,13 +12,20 @@
                 <input type="date" id="fecha_reserva" name="fecha_reserva" class="form-control" required>
             </div>
             <div class="form-group">
-                <label for="hora_inicio">Hora de Inicio:</label>
-                <input type="time" id="hora_inicio" name="hora_inicio" class="form-control" required>
+                <label for="bloques_horarios">Bloques de Horario:</label>
+                <select id="bloques_horarios" name="bloques_horarios" class="form-control" multiple required>
+                    {% for bloque in bloques_horarios %}
+                        <option value="{{ bloque }}">{{ bloque }}</option>
+                    {% endfor %}
+                </select>
             </div>
+            <p class="text-muted">Presiona Ctrl (Cmd en Mac) para seleccionar varios bloques.</p>
+            
             <div class="form-group">
-                <label for="hora_fin">Hora de Fin:</label>
-                <input type="time" id="hora_fin" name="hora_fin" class="form-control" required>
-            </div>
+                <label for="cantidad_personas">Cantidad de Personas (Capacidad restante: {{ capacidad_restante }}):</label>
+                <input type="number" id="cantidad_personas" name="cantidad_personas" class="form-control"
+                       min="1" max="{{ capacidad_restante }}" required>
+            </div>                       
             <button type="submit" class="btn btn-success">Reservar</button>
         </form>
     </div>

@@ -17,6 +17,8 @@ class Reserva(models.Model):
     fecha_reserva = models.DateField()
     hora_inicio = models.TimeField()
     hora_fin = models.TimeField()
+    bloques_seleccionados = models.JSONField(default=list)
+    cantidad_personas = models.PositiveIntegerField(default=1)  # Nuevo campo para la cantidad de personas
     ESTADOS = [
         ('Confirmada', 'Confirmada'),
         ('Cancelada', 'Cancelada'),
@@ -26,6 +28,7 @@ class Reserva(models.Model):
 
     def __str__(self):
         return f'Reserva de {self.usuario} en {self.espacio} el {self.fecha_reserva}'
+
 
 class Notificacion(models.Model):
     reserva = models.ForeignKey(Reserva, related_name='notificacion', on_delete=models.CASCADE)
